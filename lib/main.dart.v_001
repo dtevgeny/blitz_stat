@@ -51,17 +51,11 @@ class _MyHomePageState extends State<MyHomePage> {
             crossAxisCount: 2,
             children: [
               GestureDetector(
-                onTap: () async {
-                  // todo: remove hardcode route
-                  // Navigator.of(context).push(
-                  //   MaterialPageRoute(builder: (context) => PlayerListPage()),
-                  // );
-                  GameEntity gameEntity =
-                      await BlitzStatDatabase.instance.getGameEntity(1);
+                onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (context) => GamePage(gameEntity: gameEntity)),
-                  );
+                     MaterialPageRoute(builder: (context) => PlayerListPage()),
+                   );
+                   GameEntity gameEntity = BlitzStatDatabase.instance.getGameEntity(1);
                 },
                 child: Card(
                   key: const Key('new_game'),
