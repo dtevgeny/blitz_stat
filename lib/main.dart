@@ -57,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   //   MaterialPageRoute(builder: (context) => PlayerListPage()),
                   // );
                   GameEntity gameEntity =
-                      await BlitzStatDatabase.instance.getGameEntity(2);
+                      await BlitzStatDatabase.instance.getGameEntity(1);
                   Navigator.of(context).push(
                     MaterialPageRoute(
                         builder: (context) => GamePage(gameEntity: gameEntity)),
@@ -81,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         // color: Colors.blue.withOpacity(0.8),
                         color: Theme.of(context).primaryColor.withOpacity(0.8),
                         child: const Center(
-                          child: Text('Новая игра',
+                          child: Text('Новая игра 1',
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                   color: Colors.white,
@@ -92,15 +92,31 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
               ),
-              const Card(
-                child: Text('Игроки'),
+              GestureDetector(
+                onTap: () async {
+                  GameEntity gameEntity =
+                      await BlitzStatDatabase.instance.getGameEntity(2);
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (context) => GamePage(gameEntity: gameEntity)),
+                  );
+                },
+                child: const Card(
+                  child: Text('Игроки 2'),
+                ),
               ),
-              // const Card(
-              //   child: Text('История',
-              //       style: TextStyle(fontWeight: FontWeight.bold)),
-              // ),
-              const Card(
-                child: Text('История'),
+              GestureDetector(
+                onTap: () async {
+                  GameEntity gameEntity =
+                  await BlitzStatDatabase.instance.getGameEntity(3);
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (context) => GamePage(gameEntity: gameEntity)),
+                  );
+                },
+                child: const Card(
+                  child: Text('История 3'),
+                ),
               ),
               const Card(
                 child: Text('Статистика'),
@@ -108,8 +124,15 @@ class _MyHomePageState extends State<MyHomePage> {
               const Card(
                 child: Text('Синхронизация'),
               ),
-              const Card(
-                child: Text('Выйти'),
+              GestureDetector(
+                onTap: () async {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => PlayerListPage()),
+                  );
+                },
+                child: Card(
+                  child: Text('Выйти'),
+                ),
               ),
             ],
           ),

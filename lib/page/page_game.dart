@@ -8,6 +8,7 @@ import 'package:blitz_stat/entity/round_winner_entity.dart';
 import 'package:blitz_stat/model/game_model.dart';
 import 'package:blitz_stat/entity/player_entity.dart';
 import 'package:blitz_stat/model/round_model.dart';
+import 'package:blitz_stat/page/widget/grid_delegate.dart';
 import 'package:flutter/material.dart';
 
 class GamePage extends StatefulWidget {
@@ -60,7 +61,14 @@ class _GamePageState extends State<GamePage> {
         ],
       ),
       body: Center(
-        child: isLoading ? const CircularProgressIndicator() : buildGame4(),
+        child: isLoading
+            ? const CircularProgressIndicator()
+            : Column(
+                children: [
+                  _getPlayerNameRow(),
+                  buildGameRounds(),
+                ],
+              ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.green,
@@ -73,42 +81,55 @@ class _GamePageState extends State<GamePage> {
     );
   }
 
-  Widget buildGame4() {
-    return ListView.builder(
-        itemCount: gameModel.rounds.length,
+  Widget buildGameRounds() {
+    return Expanded(
+      child: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
+          crossAxisCount: gameModel.players.length,
+          crossAxisSpacing: 2,
+          mainAxisSpacing: 2,
+          height: 50,
+        ),
+        padding: const EdgeInsets.all(2),
+        itemCount: gameModel.rounds.length * gameModel.players.length,
         itemBuilder: (context, index) {
-          return _getRoundScoreRow(gameModel.rounds[index]);
-        });
+          int row = index ~/ gameModel.players.length;
+          int col = index % gameModel.players.length;
+          return Container(
+            alignment: Alignment.center,
+            color: Colors.red,
+            child: Text(
+              gameModel.rounds[row].scores[col].score.toString(),
+              style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: gameModel.rounds[row].winners
+                          .contains(gameModel.players[col])
+                      // fontWeight: col == 2
+                      ? FontWeight.bold
+                      : FontWeight.normal),
+            ),
+          );
+        },
+      ),
+    );
   }
 
-  Row _getRoundScoreRow(RoundModel roundModel) {
-
-    bool _isWinner(RoundScoreEntity roundScoreEntity) {
-      for (PlayerEntity playerEntity in roundModel.winners) {
-        if (playerEntity.id == roundScoreEntity.playerId) {
-          return true;
-        }
-      }
-      return false;
+  Row _getPlayerNameRow() {
+    List<Widget> list = [];
+    for (PlayerEntity player in gameModel.players) {
+      list.add(Expanded(
+          child: Container(
+        alignment: Alignment.center,
+        child: Text(
+          '${player.firstname!} ${player.id}',
+          softWrap: false,
+          style: const TextStyle(fontSize: 24),
+        ),
+      )));
     }
-
-    // adhesive - клей
-    List<Widget> result = [];
-    for (RoundScoreEntity roundScoreEntity in roundModel.scores) {
-      result.add(
-        Expanded(
-            child: Container(
-                alignment: Alignment.center,
-                child: Text(
-                  roundScoreEntity.score.toString(),
-                  style: _isWinner(roundScoreEntity)
-                      ? const TextStyle(fontWeight: FontWeight.bold)
-                      : null,
-                ))),
-      );
-    }
-
-    return Row(children: result);
+    return Row(
+      children: list,
+    );
   }
 
   void _generateNewRound(GameModel gameModel) async {
