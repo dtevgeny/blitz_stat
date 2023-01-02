@@ -46,21 +46,15 @@ class _GamePageState extends State<GamePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Игра #NNN',
-          style: TextStyle(fontSize: 24),
+        title: Text(
+          'Игра #${gameEntity.id}',
+          style: const TextStyle(fontSize: 24),
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () async {
-              setState(() => isLoading = true);
-
-              gameModel =
-                  await BlitzStatDatabase.instance.getGame(gameEntity.id!);
-              print("gameEntity.id = ${gameEntity.id.toString()}");
-
-              setState(() => isLoading = false);
+              refreshGame();
             },
           ),
         ],
@@ -72,61 +66,11 @@ class _GamePageState extends State<GamePage> {
         backgroundColor: Colors.green,
         child: const Icon(Icons.add_chart),
         onPressed: () async {
-          RoundEntity round = RoundEntity(gameId: gameModel.game.id);
-          round = await BlitzStatDatabase.instance.createRound(round);
-
-          for (PlayerEntity player in gameModel.players) {
-            RoundScoreEntity roundScore = RoundScoreEntity(
-                roundId: round.id,
-                playerId: player.id,
-                score: Random().nextInt(60) - 20);
-
-            roundScore =
-                await BlitzStatDatabase.instance.createRoundScore(roundScore);
-          }
-
-          ////////////////////////////////////////////////////////////////////
-
-          List<int> winnerNumbers = [];
-          bool flag = false;
-          while (!flag) {
-            int rnd = Random().nextInt(gameModel.players.length - 1);
-
-            if (!winnerNumbers.contains(rnd)) {
-              winnerNumbers.add(rnd);
-            } else {
-              if (Random().nextInt(100 - 1) >= 30) {
-                flag = true;
-              }
-            }
-          }
-          List<RoundWinnerEntity> winners = [];
-          for (int winnerNumber in winnerNumbers) {
-            winners.add(RoundWinnerEntity(
-                roundId: round.id,
-                playerId: gameModel.players[winnerNumber].id));
-          }
-
-          print(
-              'page_game fab clicked; new round, List<roundScore>, List<roundWinner> inserted');
+          _generateNewRound(gameModel);
+          refreshGame();
         },
       ),
     );
-  }
-
-  Row _getRoundScoreRow(RoundModel roundModel) {
-    // adhesive - клей
-    List<Widget> result = [];
-    for (RoundScoreEntity roundScoreEntity in roundModel.scores) {
-      result.add(
-        Expanded(
-            child: Container(
-                alignment: Alignment.center,
-                child: Text('${roundScoreEntity.score.toString()}'))),
-      );
-    }
-
-    return Row(children: result);
   }
 
   Widget buildGame4() {
@@ -137,69 +81,57 @@ class _GamePageState extends State<GamePage> {
         });
   }
 
-  Widget buildGame3() {
-    return ListView.builder(
-        itemCount: gameModel.rounds.length,
-        itemBuilder: (context, index) {
-          int row = index ~/ gameModel.players.length;
-          int col = index % gameModel.players.length;
-          print('$index[$col,$row]');
+  Row _getRoundScoreRow(RoundModel roundModel) {
+    // adhesive - клей
+    List<Widget> result = [];
+    for (RoundScoreEntity roundScoreEntity in roundModel.scores) {
+      result.add(
+        Expanded(
+            child: Container(
+                alignment: Alignment.center,
+                child: Text(
+                  roundScoreEntity.score.toString(),
+                  // (1 == 2) ? const TextStyle(fontWeight: FontWeight.bold) : null, // !!!ERROR!!!
+                  // (roundScoreEntity.playerId! == 2) ? const TextStyle(fontWeight: FontWeight.bold) : null,
+                ))),
+      );
+    }
 
-          MaterialColor color = col % 2 == 0
-              ? (row % 2 == 0 ? Colors.red : Colors.green)
-              : (row % 2 == 0 ? Colors.blue : Colors.yellow);
-
-          // return Text('row $row | round ${gameModel.rounds[row].scores[col].score.toString()}');
-          return Text(
-              'index $index row $row | col $col | round ${gameModel.rounds[row].round.id!.toString()}');
-        });
+    return Row(children: result);
   }
 
-  Widget buildGame2() {
-    return GridView.builder(
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: gameModel.players.length,
-        childAspectRatio: 2,
-      ),
-      itemCount: gameModel.players.length * gameModel.rounds.length,
-      itemBuilder: (context, index) {
-        int row = index ~/ gameModel.players.length;
-        int col = index % gameModel.players.length;
-        print('$index[$col,$row]');
-        MaterialColor color = col % 2 == 0
-            ? (row % 2 == 0 ? Colors.red : Colors.green)
-            : (row % 2 == 0 ? Colors.blue : Colors.yellow);
+  void _generateNewRound(GameModel gameModel) async {
+    RoundEntity round = RoundEntity(gameId: gameModel.game.id);
+    round = await BlitzStatDatabase.instance.createRound(round);
 
-        return Container(
-          // color: color,
-          color: col % 2 == 0
-              ? (row % 2 == 0 ? Colors.red : Colors.green)
-              : (row % 2 == 0 ? Colors.blue : Colors.yellow),
-          child: Text(
-              '$index: $col-$row | ${gameModel.rounds[row].scores[col].score.toString()}'),
-          // child: Text('$index: $col-$row'),
-        );
-      },
-    );
+    for (PlayerEntity player in gameModel.players) {
+      RoundScoreEntity roundScore = RoundScoreEntity(
+          roundId: round.id,
+          playerId: player.id,
+          score: Random().nextInt(60) - 20);
+
+      roundScore =
+          await BlitzStatDatabase.instance.createRoundScore(roundScore);
+    }
+
+    List<int> winnerNumbers = [];
+    bool flag = false;
+    while (!flag) {
+      int rnd = Random().nextInt(gameModel.players.length - 1);
+
+      if (!winnerNumbers.contains(rnd)) {
+        winnerNumbers.add(rnd);
+      } else {
+        if (Random().nextInt(100 - 1) >= 30) {
+          flag = true;
+        }
+      }
+    }
+    List<RoundWinnerEntity> winners = [];
+    for (int winnerNumber in winnerNumbers) {
+      winners.add(RoundWinnerEntity(
+          roundId: round.id, playerId: gameModel.players[winnerNumber].id));
+    }
+    // BlitzStatDatabase.instance.createRoundWinner(roundWinner)
   }
-
-// Widget buildGame() {
-//   print('gameModel.players.length = ${gameModel.players.length}');
-//
-//   return Row(
-//     children: [
-//       Flexible(
-//         child: ListView.builder(
-//             padding: const EdgeInsets.symmetric(horizontal: 16),
-//             itemCount: gameModel.players.length,
-//             itemBuilder: (context, index) {
-//               return Container(
-//                   color: index % 2 == 0 ? Colors.red : Colors.green,
-//                   child: Text(
-//                       '${gameModel.players[index].firstname} ${gameModel.players[index].id}'));
-//             }),
-//       ),
-//     ],
-//   );
-// }
 }
