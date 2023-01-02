@@ -2,9 +2,9 @@ import 'dart:math';
 
 import 'package:blitz_stat/db/database.dart';
 import 'package:blitz_stat/entity/game_entity.dart';
-import 'package:blitz_stat/entity/game_player_entity.dart';
 import 'package:blitz_stat/entity/round_entity.dart';
 import 'package:blitz_stat/entity/round_score_entity.dart';
+import 'package:blitz_stat/entity/round_winner_entity.dart';
 import 'package:blitz_stat/model/game_model.dart';
 import 'package:blitz_stat/entity/player_entity.dart';
 import 'package:blitz_stat/model/round_model.dart';
@@ -85,7 +85,30 @@ class _GamePageState extends State<GamePage> {
                 await BlitzStatDatabase.instance.createRoundScore(roundScore);
           }
 
-          print('page_game fab clicked; new round and roundScores inserted');
+          ////////////////////////////////////////////////////////////////////
+
+          List<int> winnerNumbers = [];
+          bool flag = false;
+          while (!flag) {
+            int rnd = Random().nextInt(gameModel.players.length - 1);
+
+            if (!winnerNumbers.contains(rnd)) {
+              winnerNumbers.add(rnd);
+            } else {
+              if (Random().nextInt(100 - 1) >= 30) {
+                flag = true;
+              }
+            }
+          }
+          List<RoundWinnerEntity> winners = [];
+          for (int winnerNumber in winnerNumbers) {
+            winners.add(RoundWinnerEntity(
+                roundId: round.id,
+                playerId: gameModel.players[winnerNumber].id));
+          }
+
+          print(
+              'page_game fab clicked; new round, List<roundScore>, List<roundWinner> inserted');
         },
       ),
     );
@@ -98,7 +121,7 @@ class _GamePageState extends State<GamePage> {
       result.add(
         Expanded(
             child: Container(
-              alignment: Alignment.center,
+                alignment: Alignment.center,
                 child: Text('${roundScoreEntity.score.toString()}'))),
       );
     }

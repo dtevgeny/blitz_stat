@@ -240,11 +240,12 @@ class BlitzStatDatabase {
         whereArgs: [gameId],
         orderBy: '${RoundFields.id} ASC');
 
-    if (result.isNotEmpty) {
-      return result.map((json) => RoundEntity.fromJson(json)).toList();
-    } else {
-      throw Exception('listRoundEntity with gameId $gameId not found');
-    }
+    // if (result.isNotEmpty) {
+    //   return result.map((json) => RoundEntity.fromJson(json)).toList();
+    // } else {
+    //   throw Exception('listRoundEntity with gameId $gameId not found');
+    // }
+    return result.map((json) => RoundEntity.fromJson(json)).toList();
   }
 
   Future<List<RoundScoreEntity>> listRoundScoreEntity(int roundId) async {
@@ -256,11 +257,29 @@ class BlitzStatDatabase {
         whereArgs: [roundId],
         orderBy: '${RoundScoreFields.playerId} ASC');
 
-    if (result.isNotEmpty) {
-      return result.map((json) => RoundScoreEntity.fromJson(json)).toList();
-    } else {
-      throw Exception('listRoundEntity with roundId $roundId not found');
-    }
+    // if (result.isNotEmpty) {
+    //   return result.map((json) => RoundScoreEntity.fromJson(json)).toList();
+    // } else {
+    //   throw Exception('listRoundEntity with roundId $roundId not found');
+    // }
+    return result.map((json) => RoundScoreEntity.fromJson(json)).toList();
+  }
+
+  Future<List<RoundWinnerEntity>> listRoundWinnerEntity(int roundId) async {
+    final db = await instance.database;
+
+    final result = await db.query(tableRoundWinners,
+        columns: RoundWinnerFields.values,
+        where: '${RoundWinnerFields.roundId} = ?',
+        whereArgs: [roundId],
+        orderBy: '${RoundScoreFields.playerId} ASC');
+
+    // if (result.isNotEmpty) {
+    //   return result.map((json) => RoundWinnerEntity.fromJson(json)).toList();
+    // } else {
+    //   throw Exception('listRoundWinnerEntity with roundId $roundId not found');
+    // }
+    return result.map((json) => RoundWinnerEntity.fromJson(json)).toList();
   }
 
 ////////////////////////////////////////////////////////////////////////////////
