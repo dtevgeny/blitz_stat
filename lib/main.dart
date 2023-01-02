@@ -57,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   //   MaterialPageRoute(builder: (context) => PlayerListPage()),
                   // );
                   GameEntity gameEntity =
-                      await BlitzStatDatabase.instance.getGameEntity(1);
+                      await BlitzStatDatabase.instance.getGameEntity(2);
                   Navigator.of(context).push(
                     MaterialPageRoute(
                         builder: (context) => GamePage(gameEntity: gameEntity)),
@@ -93,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               const Card(
-                child: const Text('Игроки'),
+                child: Text('Игроки'),
               ),
               // const Card(
               //   child: Text('История',

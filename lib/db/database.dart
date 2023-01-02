@@ -318,7 +318,20 @@ class BlitzStatDatabase {
   Future<RoundModel> getRound(int roundId) async {
     RoundEntity roundEntity = await getRoundEntity(roundId);
     List<RoundScoreEntity> roundScores = await listRoundScoreEntity(roundId);
+    List<RoundWinnerEntity> _listRoundWinnerEntity = await listRoundWinnerEntity(roundId);
+
+    // todo: strange format...
+    // List<PlayerEntity> winners = [];
+    // for (PlayerEntity playerEntity in _listRoundWinnerEntity){
+    //
+    // }
+
+    // todo: think a little bit more about further code
     List<PlayerEntity> winners = [];
+    for (RoundWinnerEntity roundWinnerEntity in _listRoundWinnerEntity) {
+      PlayerEntity playerEntity = await getPlayerEntity(roundWinnerEntity.playerId!);
+      winners.add(playerEntity);
+    }
 
     return RoundModel(roundEntity, roundScores, winners);
   }

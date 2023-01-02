@@ -82,6 +82,16 @@ class _GamePageState extends State<GamePage> {
   }
 
   Row _getRoundScoreRow(RoundModel roundModel) {
+
+    bool _isWinner(RoundScoreEntity roundScoreEntity) {
+      for (PlayerEntity playerEntity in roundModel.winners) {
+        if (playerEntity.id == roundScoreEntity.playerId) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     // adhesive - клей
     List<Widget> result = [];
     for (RoundScoreEntity roundScoreEntity in roundModel.scores) {
@@ -91,8 +101,9 @@ class _GamePageState extends State<GamePage> {
                 alignment: Alignment.center,
                 child: Text(
                   roundScoreEntity.score.toString(),
-                  // (1 == 2) ? const TextStyle(fontWeight: FontWeight.bold) : null, // !!!ERROR!!!
-                  // (roundScoreEntity.playerId! == 2) ? const TextStyle(fontWeight: FontWeight.bold) : null,
+                  style: _isWinner(roundScoreEntity)
+                      ? const TextStyle(fontWeight: FontWeight.bold)
+                      : null,
                 ))),
       );
     }
@@ -114,6 +125,7 @@ class _GamePageState extends State<GamePage> {
           await BlitzStatDatabase.instance.createRoundScore(roundScore);
     }
 
+    // todo: prepare/develop function that uses not numbers, but arrays
     List<int> winnerNumbers = [];
     bool flag = false;
     while (!flag) {
@@ -127,11 +139,13 @@ class _GamePageState extends State<GamePage> {
         }
       }
     }
+
     List<RoundWinnerEntity> winners = [];
     for (int winnerNumber in winnerNumbers) {
-      winners.add(RoundWinnerEntity(
-          roundId: round.id, playerId: gameModel.players[winnerNumber].id));
+      RoundWinnerEntity roundWinnerEntity = RoundWinnerEntity(
+          roundId: round.id, playerId: gameModel.players[winnerNumber].id);
+      winners.add(roundWinnerEntity);
+      BlitzStatDatabase.instance.createRoundWinner(roundWinnerEntity);
     }
-    // BlitzStatDatabase.instance.createRoundWinner(roundWinner)
   }
 }
