@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:blitz_stat/core/constants.dart';
 import 'package:blitz_stat/db/database.dart';
 import 'package:blitz_stat/entity/game_entity.dart';
 import 'package:blitz_stat/entity/round_entity.dart';
@@ -7,9 +8,10 @@ import 'package:blitz_stat/entity/round_score_entity.dart';
 import 'package:blitz_stat/entity/round_winner_entity.dart';
 import 'package:blitz_stat/model/game_model.dart';
 import 'package:blitz_stat/entity/player_entity.dart';
-import 'package:blitz_stat/model/round_model.dart';
 import 'package:blitz_stat/page/widget/grid_delegate.dart';
 import 'package:flutter/material.dart';
+
+import 'package:fl_chart/fl_chart.dart';
 
 class GamePage extends StatefulWidget {
   GameEntity gameEntity;
@@ -65,6 +67,7 @@ class _GamePageState extends State<GamePage> {
             ? const CircularProgressIndicator()
             : Column(
                 children: [
+                  _getChart(),
                   _getPlayerNameRow(),
                   buildGameRounds(),
                 ],
@@ -81,49 +84,113 @@ class _GamePageState extends State<GamePage> {
     );
   }
 
-  Widget buildGameRounds() {
-    return Expanded(
-      child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
-          crossAxisCount: gameModel.players.length,
-          crossAxisSpacing: 2,
-          mainAxisSpacing: 2,
-          height: 50,
+  Widget _getChart() {
+    int _getSubtotal(int row, int col) {
+      int result = 0;
+      for (int i = gameModel.rounds.length - 1; i > row - 1; i--) {
+        result += gameModel.rounds[i].scores[col].score!;
+      }
+      return result;
+    }
+
+    List<List<FlSpot>> spots = [];
+    for (int i = 0; i < gameModel.players.length; i++) {
+      List<FlSpot> _currentSpot = [];
+      for (int n = 0; n <= gameModel.rounds.length; n++) {
+        _currentSpot.add(FlSpot(n.toDouble(),
+            _getSubtotal(gameModel.rounds.length - n, i).toDouble()));
+      }
+      spots.add(_currentSpot);
+    }
+
+    List<LineChartBarData> listLineChartBarData = [];
+    for (int i = 0; i < gameModel.players.length; i++) {
+      listLineChartBarData.add(LineChartBarData(
+        color: playerColors[i],
+        barWidth: 3,
+        spots: spots[i],
+        isCurved: true,
+        dotData: FlDotData(
+          show: false,
         ),
-        padding: const EdgeInsets.all(2),
-        itemCount: gameModel.rounds.length * gameModel.players.length,
-        itemBuilder: (context, index) {
-          int row = index ~/ gameModel.players.length;
-          int col = index % gameModel.players.length;
-          return Container(
-            alignment: Alignment.center,
-            color: Colors.red,
-            child: Text(
-              gameModel.rounds[row].scores[col].score.toString(),
-              style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: gameModel.rounds[row].winners
-                          .contains(gameModel.players[col])
-                      // fontWeight: col == 2
-                      ? FontWeight.bold
-                      : FontWeight.normal),
-            ),
-          );
-        },
+      ));
+    }
+
+    return AspectRatio(
+      aspectRatio: 1.5,
+      child: LineChart(
+        LineChartData(
+          lineTouchData: LineTouchData(
+            enabled: false,
+          ),
+          lineBarsData: listLineChartBarData,
+        ),
+      ),
+    );
+  }
+
+  Widget buildGameRounds() {
+    int _getSubtotal(int index) {
+      int row = index ~/ gameModel.players.length;
+      int col = index % gameModel.players.length;
+
+      int result = 0;
+      for (int i = gameModel.rounds.length - 1; i > row - 1; i--) {
+        result += gameModel.rounds[i].scores[col].score!;
+      }
+
+      return result;
+    }
+
+    return Expanded(
+      child: Container(
+        color: Colors.blue,
+        child: GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
+            crossAxisCount: gameModel.players.length,
+            crossAxisSpacing: 1,
+            mainAxisSpacing: 1,
+            height: 50,
+          ),
+          padding: const EdgeInsets.all(1),
+          itemCount: gameModel.rounds.length * gameModel.players.length,
+          itemBuilder: (context, index) {
+            int row = index ~/ gameModel.players.length;
+            int col = index % gameModel.players.length;
+            return Container(
+              alignment: Alignment.center,
+              color: Colors.white,
+              child: Text(
+                _getSubtotal(index).toString(),
+                style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: gameModel.rounds[row].winners
+                            .map((e) => e.id!)
+                            .toList()
+                            .contains(gameModel.players[col].id)
+                        ? FontWeight.bold
+                        : FontWeight.normal),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
 
   Row _getPlayerNameRow() {
     List<Widget> list = [];
-    for (PlayerEntity player in gameModel.players) {
+    for (int i = 0; i < gameModel.players.length; i++) {
       list.add(Expanded(
           child: Container(
         alignment: Alignment.center,
         child: Text(
-          '${player.firstname!} ${player.id}',
+          '${gameModel.players[i].firstname} ${gameModel.players[i].id}',
           softWrap: false,
-          style: const TextStyle(fontSize: 24),
+          style: TextStyle(
+            fontSize: 24,
+            color: playerColors[i],
+          ),
         ),
       )));
     }

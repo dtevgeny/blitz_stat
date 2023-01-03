@@ -118,8 +118,18 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Text('История 3'),
                 ),
               ),
-              const Card(
-                child: Text('Статистика'),
+              GestureDetector(
+                onTap: () async {
+                  GameEntity gameEntity =
+                  await BlitzStatDatabase.instance.getGameEntity(4);
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (context) => GamePage(gameEntity: gameEntity)),
+                  );
+                },
+                child: const Card(
+                  child: Text('Статистика 4'),
+                ),
               ),
               const Card(
                 child: Text('Синхронизация'),

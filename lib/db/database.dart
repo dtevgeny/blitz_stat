@@ -238,7 +238,8 @@ class BlitzStatDatabase {
         columns: RoundFields.values,
         where: '${RoundFields.gameId} = ?',
         whereArgs: [gameId],
-        orderBy: '${RoundFields.id} ASC');
+        // orderBy: '${RoundFields.id} ASC');
+        orderBy: '${RoundFields.id} DESC');
 
     // if (result.isNotEmpty) {
     //   return result.map((json) => RoundEntity.fromJson(json)).toList();
