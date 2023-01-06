@@ -231,6 +231,24 @@ class BlitzStatDatabase {
     }
   }
 
+  Future<List<GameEntity>> listGameEntity() async {
+    final db = await instance.database;
+
+    final result = await db.query(tableGames,
+        columns: GameFields.values,
+        // todo: status errors
+        // where: '${GameFields.status} = ?',
+        // whereArgs: [100],
+        orderBy: '${GameFields.dtUpdate} DESC');
+
+    return result.map((json) => GameEntity.fromJson(json)).toList();
+    // if (result.isNotEmpty) {
+    //   return result.map((json) => GameEntity.fromJson(json)).toList();
+    // } else {
+    //   throw Exception('listGameEntity not found');
+    // }
+  }
+
   Future<List<RoundEntity>> listRoundEntity(int gameId) async {
     final db = await instance.database;
 
@@ -337,6 +355,17 @@ class BlitzStatDatabase {
     return RoundModel(roundEntity, roundScores, winners);
   }
 
+  Future<List<GameModel>> listGame() async {
+    List<GameEntity> _listGameEntity = await listGameEntity();
+    List<GameModel> result = [];
+
+    for (GameEntity _gameEntity in _listGameEntity){
+      result.add(await getGame(_gameEntity.id!));
+    }
+
+    return result;
+  }
+
   Future<GameModel> getGame(int gameId) async {
     GameEntity _gameEntity = await getGameEntity(gameId);
 
@@ -356,5 +385,40 @@ class BlitzStatDatabase {
         GameModel(_gameEntity, _listPlayerEntity, _listRoundModel);
 
     return gameModel;
+  }
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  Future generateBasicPlayers() async{
+    DateTime _now = DateTime.now();
+
+    await instance.createPlayer(PlayerEntity(
+      firstname: 'Татьяна',
+      lastname: 'Коробец',
+      dtCreate: _now,
+      dtUpdate: _now,
+    ));
+
+    await instance.createPlayer(PlayerEntity(
+      firstname: 'Анна',
+      lastname: 'Филина',
+      dtCreate: _now,
+      dtUpdate: _now,
+    ));
+
+    await instance.createPlayer(PlayerEntity(
+      firstname: 'Ирина',
+      lastname: 'Озябкина',
+      dtCreate: _now,
+      dtUpdate: _now,
+    ));
+
+    await instance.createPlayer(PlayerEntity(
+      firstname: 'Ксения',
+      lastname: 'Алексеня',
+      dtCreate: _now,
+      dtUpdate: _now,
+    ));
+
   }
 }

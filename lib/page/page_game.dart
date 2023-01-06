@@ -185,7 +185,7 @@ class _GamePageState extends State<GamePage> {
           child: Container(
         alignment: Alignment.center,
         child: Text(
-          '${gameModel.players[i].firstname} ${gameModel.players[i].id}',
+          '${gameModel.players[i].firstname} ${gameModel.players[i].firstname == 'PLAYER' ? gameModel.players[i].id : ''}',
           softWrap: false,
           style: TextStyle(
             fontSize: 24,
@@ -207,7 +207,7 @@ class _GamePageState extends State<GamePage> {
       RoundScoreEntity roundScore = RoundScoreEntity(
           roundId: round.id,
           playerId: player.id,
-          score: Random().nextInt(60) - 20);
+          score: Random().nextInt(30) - 10);
 
       roundScore =
           await BlitzStatDatabase.instance.createRoundScore(roundScore);

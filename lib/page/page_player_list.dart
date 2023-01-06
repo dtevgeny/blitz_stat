@@ -89,9 +89,13 @@ class _PlayerListPageState extends State<PlayerListPage> {
               heroTag: 'fab_page_player_list_new_player',
               backgroundColor: Colors.green,
               child: const Icon(Icons.person_add),
-              onPressed: () {
-                BlitzStatDatabase.instance
-                    .createPlayer(PlayerEntity(firstname: 'PLAYER'));
+              onPressed: () async {
+                if (players.isEmpty) {
+                  await BlitzStatDatabase.instance.generateBasicPlayers();
+                } else {
+                  await BlitzStatDatabase.instance
+                      .createPlayer(PlayerEntity(firstname: 'PLAYER'));
+                }
                 refreshPlayers();
               },
             ),
