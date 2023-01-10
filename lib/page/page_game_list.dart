@@ -80,32 +80,6 @@ class _GameListPageState extends State<GameListPage> {
   }
 
   Widget buildGames() {
-    return buildGamesListView();
-    // return buildGamesGridView();
-  }
-
-  Widget buildGamesGridView() {
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-      ),
-      itemCount: listGameModel.length,
-      itemBuilder: (context, index) {
-        return _r(index, listGameModel[index]);
-      },
-    );
-  }
-
-  Widget _r(int index, GameModel gameModel) {
-    return Container(
-      padding: EdgeInsets.all(8),
-      color: playerColors[index % playerColors.length],
-      // child: Text('game ${gameModel.game.id} pressed'),
-      child: CircleAvatar(child: Text('game ${gameModel.game.id}')),
-    );
-  }
-
-  Widget buildGamesListView() {
     return ListView.builder(
       padding: const EdgeInsets.all(4),
       itemCount: listGameModel.length,
@@ -181,12 +155,12 @@ class _GameListPageState extends State<GameListPage> {
                   ],
                 ),
               ),
-              CircleAvatar(
-                backgroundImage: const AssetImage("assets/images/avatar.jpg"),
+              const CircleAvatar(
+                backgroundImage: AssetImage("assets/images/avatar.jpg"),
                 radius: 50,
                 // backgroundColor: Colors.red,
                 // child: Text('game_id = ${gameModel.game.id}'),
-                child: const Text('139'),
+                child: Text('139'),
               ),
             ],
           ),
@@ -198,140 +172,6 @@ class _GameListPageState extends State<GameListPage> {
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _getGameResultLine1(GameModel gameModel) {
-    int _getPlayerTotalScore(int index) {
-      return 101 - 10 * index;
-    }
-
-    return GestureDetector(
-      onTap: () async {
-        print('game ${gameModel.game.id} pressed');
-        // todo: getGame directly without db access
-        GameEntity gameEntity =
-            await BlitzStatDatabase.instance.getGameEntity(gameModel.game.id!);
-        Navigator.of(context).push(
-          MaterialPageRoute(
-              builder: (context) => GamePage(gameEntity: gameEntity)),
-        );
-      },
-      child: SizedBox(
-        height: 152,
-        child: Card(
-          margin: const EdgeInsets.all(8),
-          elevation: 8,
-          //
-          child: Row(
-            children: [
-              // todo: remove SizedBox
-              const SizedBox(width: 8),
-              Container(
-                color: dev ? Colors.white : devColor(0),
-                child: Container(
-                  decoration: _boxDecoration(goldColor),
-                  clipBehavior: Clip.hardEdge,
-                  child: CircleAvatar(
-                    radius: 55,
-                    backgroundImage:
-                        const AssetImage("assets/images/avatar.jpg"),
-                    child: Container(
-                      child: Text(
-                        '139',
-                        softWrap: false,
-                        style: TextStyle(
-                          fontSize: 64,
-                          fontWeight: FontWeight.bold,
-                          color: goldColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              VerticalDivider(
-                color: Colors.blue,
-              ),
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.all(8),
-                  // color: devColor(null),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _getLoserLine(0),
-                      Divider(color: Colors.red),
-                      _getLoserLine(1),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  BoxDecoration _boxDecoration(Color _boxDecorationColor) {
-    return BoxDecoration(
-      shape: BoxShape.circle,
-      boxShadow: [
-        BoxShadow(
-          blurRadius: 8,
-          color: _boxDecorationColor,
-          spreadRadius: 4,
-        ),
-      ],
-    );
-  }
-
-  Widget _getLoserLine(int i) {
-    return Container(
-      height: 52,
-      // color: i == 0 ? Colors.green : Colors.purple,
-      // color: devColor(i + 1),
-      child: Row(
-        children: [
-          // todo: remove SizedBox
-          const SizedBox(width: 8),
-          Container(
-            decoration: _boxDecoration(i == 0 ? silverColor : bronzeColor),
-            child: CircleAvatar(
-              backgroundColor: bronzeColor,
-              child: const CircleAvatar(
-                backgroundImage: AssetImage("assets/images/avatar.jpg"),
-              ),
-            ),
-          ),
-          Expanded(
-              child: Center(
-                  child: Text(
-            '${listGameModel[0].players[0].firstname!} ',
-            style: const TextStyle(fontSize: 24),
-          ))),
-          CircleAvatar(
-            backgroundColor: Colors.white,
-            child: CircleAvatar(
-              radius: 19,
-              backgroundColor: i == 0 ? silverColor : bronzeColor,
-              child: const Text(
-                '68',
-                style: TextStyle(color: Colors.white, fontSize: 24),
-                // style: TextStyle(color: i == 0 ? silverColor : bronzeColor, fontSize: 24),
-              ),
-            ),
-          ),
-          const SizedBox(
-            width: 8,
-          ),
-        ],
-        // children: const [
-        //   Icon(Icons.account_circle),
-        //   Text('data'),
-        // ],
       ),
     );
   }
