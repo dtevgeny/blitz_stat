@@ -15,6 +15,7 @@ Future main() async {
   runApp(MyApp());
 }
 
+// todo: fix GameResults spacing between losers
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

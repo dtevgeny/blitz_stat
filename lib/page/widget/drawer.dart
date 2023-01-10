@@ -8,7 +8,7 @@ Drawer buildDrawer(int? selected) {
       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
     );
     return ListTile(
-      trailing: Icon(iconData, color: iconColor),
+      trailing: Icon(iconData, color: iconColor, size: 40),
       title: Text(title, style: _textStyle),
       tileColor: isSelected ? Colors.grey.shade300 : Colors.white,
       onTap: () {},
@@ -21,8 +21,10 @@ Drawer buildDrawer(int? selected) {
         _getListTile('Новая игра', Icons.flag, Colors.green, selected == 0),
         _getListTile('Игроки', Icons.group, Colors.blue, selected == 1),
         const Divider(),
-        _getListTile('История', Icons.history, Colors.blue, selected == 2),
-        _getListTile('Статистика', Icons.bar_chart, Colors.orange, selected == 3),
+        // todo: change purple color
+        _getListTile('История', Icons.history, Colors.purple, selected == 2),
+        _getListTile(
+            'Статистика', Icons.bar_chart, Colors.orange, selected == 3),
         const Divider(),
         _getListTile('Синхронизация', Icons.sync, Colors.blue, selected == 4),
         const Divider(),

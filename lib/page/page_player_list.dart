@@ -96,7 +96,7 @@ class _PlayerListPageState extends State<PlayerListPage> {
                   await BlitzStatDatabase.instance
                       .createPlayer(PlayerEntity(firstname: 'PLAYER'));
                 }
-                refreshPlayers();
+                await refreshPlayers();
               },
             ),
           ],
