@@ -1,1 +1,5 @@
-class GameResultItemModel {}
+class GameResultItemModel {
+
+
+
+}

@@ -1,3 +1,5 @@
+import 'package:blitz_stat/db/database.dart';
+
 const String tableRoundWinners = 'roundWinner';
 
 class RoundWinnerFields {
@@ -82,4 +84,8 @@ class RoundWinnerEntity {
         : dtUpdate!.toIso8601String(),
     RoundWinnerFields.dtUpload: dtUpload?.toIso8601String(),
   };
+
+  Future<RoundWinnerEntity> save() async {
+    return await BlitzStatDatabase.instance.createRoundWinner(this);
+  }
 }

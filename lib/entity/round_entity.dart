@@ -1,3 +1,5 @@
+import 'package:blitz_stat/db/database.dart';
+
 const String tableRounds = 'round';
 
 class RoundFields {
@@ -75,4 +77,8 @@ class RoundEntity {
         : dtUpdate!.toIso8601String(),
     RoundFields.dtUpload: dtUpload?.toIso8601String(),
   };
+
+  Future<RoundEntity> save() async {
+    return await BlitzStatDatabase.instance.createRound(this);
+  }
 }

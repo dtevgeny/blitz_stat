@@ -1,14 +1,18 @@
-import 'dart:math';
-
 import 'package:blitz_stat/core/constants.dart';
 import 'package:blitz_stat/db/database.dart';
 import 'package:blitz_stat/entity/game_entity.dart';
+import 'package:blitz_stat/entity/game_player_entity.dart';
+import 'package:blitz_stat/entity/player_entity.dart';
+import 'package:blitz_stat/entity/round_score_entity.dart';
 import 'package:blitz_stat/model/game_model.dart';
+import 'package:blitz_stat/model/game_player_result_model.dart';
+import 'package:blitz_stat/model/round_model.dart';
 import 'package:blitz_stat/page/page_game.dart';
 import 'package:blitz_stat/page/page_player_list.dart';
 import 'package:blitz_stat/page/widget/drawer.dart';
-import 'package:blitz_stat/page/widget/grid_delegate.dart';
 import 'package:flutter/material.dart';
+
+import 'package:blitz_stat/core/constants.dart' as constants;
 
 class GameListPage extends StatefulWidget {
   GameListPage();
@@ -45,6 +49,7 @@ class _GameListPageState extends State<GameListPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
+        backgroundColor: Theme.of(context).primaryColor,
         title: const Text(
           'Блиц!',
           style: TextStyle(fontSize: 24),
@@ -58,6 +63,19 @@ class _GameListPageState extends State<GameListPage> {
           ),
         ],
       ),
+      // backgroundColor: Colors.deepPurpleAccent,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.flag, color: Colors.white),
+        // backgroundColor: primaryColor,
+        // child: Icon(Icons.flag, color: constants.accentColor),
+        onPressed: () async {
+          await Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => PlayerListPage()));
+
+          // refreshGames();
+        },
+      ),
       drawer: buildDrawer(null),
       body: Center(
         child: isLoading
@@ -66,20 +84,11 @@ class _GameListPageState extends State<GameListPage> {
                 ? const Text('no games')
                 : buildGames(),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.flag),
-        onPressed: () async {
-          await Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => PlayerListPage()));
-
-          // refreshGames();
-        },
-      ),
     );
   }
 
   Widget buildGames() {
+    // return buildGames2();
     return ListView.builder(
       padding: const EdgeInsets.all(4),
       itemCount: listGameModel.length,
@@ -90,88 +99,120 @@ class _GameListPageState extends State<GameListPage> {
   }
 
   Widget _getGameResultLine(GameModel gameModel) {
-    return Card(
-      shape: const BeveledRectangleBorder(),
-      elevation: 4,
-      child: Column(
-        children: [
-          Row(
+    GamePlayerResultModel _getWinner() {
+      List<GamePlayerResultModel> scores = List.generate(
+          gameModel.players.length,
+          (index) =>
+              GamePlayerResultModel(gameModel, gameModel.players[index]));
+
+      scores.sort((a, b) => -a.totalScore.compareTo(b.totalScore));
+      return scores[0];
+    }
+
+    GamePlayerResultModel _winner = _getWinner();
+
+    Widget _getIconText(IconData iconData, String text) {
+      return Flexible(
+        child: Row(
+          children: [
+            Icon(iconData),
+            Text(
+              text,
+              style: const TextStyle(
+                fontSize: 24,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: () async {
+        GameEntity gameEntity =
+            await BlitzStatDatabase.instance.getGameEntity(gameModel.game.id!);
+        await Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => GamePage(gameEntity: gameEntity)));
+      },
+      child: Card(
+        shadowColor: _getWinner().totalScore <= 100 ? Colors.red : null,
+        // shape: const BeveledRectangleBorder(),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8 * 1)),
+        ),
+        elevation: _getWinner().totalScore <= 100 ? 8 : 4,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
             children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    Row(
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
                       children: [
-                        const Text(
-                          'Татьяна',
-                          style: TextStyle(
-                            fontSize: 24,
-                          ),
-                        ),
-                        Row(children: [
-                          Row(
-                            children: const [
-                              Icon(Icons.ac_unit),
-                              Text('139'),
-                            ],
-                          ),
-                          Row(
-                            children: const [
-                              Icon(Icons.ac_unit),
-                              Text('139'),
-                            ],
-                          ),
-                        ]),
-                      ],
-                    ),
-                    Row(
-                      children: [
+                        // todo: remove this Row
                         Row(
-                          children: const [
-                            Icon(Icons.ac_unit),
-                            Text('99'),
+                          children: [
+                            Text(_winner.playerEntity.firstname!,
+                                // style: const TextStyle(fontSize: 24),
+                                style: const TextStyle(fontSize: 24)),
                           ],
                         ),
+                        // todo: change Divider for Padding
+                        // const Divider(endIndent: 8, color: Colors.white),
+                        const Divider(endIndent: 8),
                         Row(
-                          children: const [
-                            Icon(Icons.ac_unit),
-                            Text('99'),
-                          ],
-                        ),
-                        Row(
-                          children: const [
-                            Icon(Icons.ac_unit),
-                            Text('99'),
-                          ],
-                        ),
-                        Row(
-                          children: const [
-                            Icon(Icons.ac_unit),
-                            Text('99'),
+                          children: [
+                            _getIconText(
+                                Icons.group_outlined,
+                                // _getIconText(Icons.groups,
+                                // _getIconText(Icons.person_outline,
+                                gameModel.players.length.toString()),
+                            _getIconText(Icons.update,
+                                gameModel.rounds.length.toString()),
+                            _getIconText(Icons.star_outline,
+                                _winner.roundWinCount.toString()),
+                            _getIconText(Icons.vertical_align_top,
+                                _winner.maximumRoundScore.toString()),
                           ],
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  CircleAvatar(
+                    backgroundImage: AssetImage(
+                        "assets/images/${_winner.playerEntity.id! > 4 ? 'avatar' : _winner.playerEntity.id.toString()}.jpg"),
+                    radius: 40,
+                    // backgroundColor: Colors.red,
+                    // child: Text('game_id = ${gameModel.game.id}'),
+                    child: Text(_winner.totalScore.toString(),
+                        style: const TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white)
+                        // .copyWith(
+                        //     foreground: Paint()
+                        //       ..style = PaintingStyle.stroke
+                        //       ..color = Colors.amber
+                        //       ..strokeWidth = 1)
+                        ),
+                  ),
+                ],
               ),
-              const CircleAvatar(
-                backgroundImage: AssetImage("assets/images/avatar.jpg"),
-                radius: 50,
-                // backgroundColor: Colors.red,
-                // child: Text('game_id = ${gameModel.game.id}'),
-                child: Text('139'),
+              // todo: change Divider for Padding
+              const Divider(color: Colors.white),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(_winner.timeAgo,
+                      style: TextStyle(color: Colors.grey.shade400)),
+                  const VerticalDivider(width: 4,),
+                  Icon(Icons.done_all, color: Colors.grey.shade400),
+                ],
               ),
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text('999 минут'),
-              Text('999 дней назад'),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }

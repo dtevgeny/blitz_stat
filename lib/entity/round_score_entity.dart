@@ -1,3 +1,5 @@
+import 'package:blitz_stat/db/database.dart';
+
 const String tableRoundScores = 'roundScore';
 
 class RoundScoreFields {
@@ -90,4 +92,8 @@ class RoundScoreEntity {
         : dtUpdate!.toIso8601String(),
     RoundScoreFields.dtUpload: dtUpload?.toIso8601String(),
   };
+
+  Future<RoundScoreEntity> save() async {
+    return await BlitzStatDatabase.instance.createRoundScore(this);
+  }
 }

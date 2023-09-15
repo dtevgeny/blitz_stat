@@ -1,3 +1,5 @@
+import '../db/database.dart';
+
 const String tablePlayers = 'player';
 
 class PlayerFields {
@@ -80,4 +82,8 @@ class PlayerEntity {
             : dtCreate!.toIso8601String(),
         PlayerFields.dtUpdate: dtUpdate?.toIso8601String(),
       };
+
+  Future<PlayerEntity> save() async {
+    return await BlitzStatDatabase.instance.createPlayer(this);
+  }
 }

@@ -8,6 +8,7 @@ import 'package:blitz_stat/entity/round_score_entity.dart';
 import 'package:blitz_stat/entity/round_winner_entity.dart';
 import 'package:blitz_stat/model/game_model.dart';
 import 'package:blitz_stat/entity/player_entity.dart';
+import 'package:blitz_stat/page/page_add_round.dart';
 import 'package:blitz_stat/page/widget/grid_delegate.dart';
 import 'package:flutter/material.dart';
 
@@ -53,6 +54,8 @@ class _GamePageState extends State<GamePage> {
           'Игра #${gameEntity.id}',
           style: const TextStyle(fontSize: 24),
         ),
+        centerTitle: true,
+        backgroundColor: Theme.of(context).primaryColor,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -75,10 +78,15 @@ class _GamePageState extends State<GamePage> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.green,
-        child: const Icon(Icons.add_chart),
+        child: const Icon(Icons.add_chart, color: Colors.white),
         onPressed: () async {
-          _generateNewRound(gameModel);
-          refreshGame();
+          // _generateNewRound(gameModel);
+          // refreshGame();
+          await Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => AddRoundPage(
+              gameModel: gameModel,
+            ),
+          ));
         },
       ),
     );
@@ -119,6 +127,7 @@ class _GamePageState extends State<GamePage> {
     return AspectRatio(
       aspectRatio: 1.5,
       child: LineChart(
+
         LineChartData(
           lineTouchData: LineTouchData(
             enabled: false,

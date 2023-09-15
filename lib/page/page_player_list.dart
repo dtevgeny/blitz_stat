@@ -1,7 +1,10 @@
+import 'package:blitz_stat/core/constants.dart' as constants;
 import 'package:blitz_stat/db/database.dart';
 import 'package:blitz_stat/entity/game_entity.dart';
 import 'package:blitz_stat/entity/game_player_entity.dart';
 import 'package:blitz_stat/entity/player_entity.dart';
+import 'package:blitz_stat/page/page_add_player.dart';
+import 'package:blitz_stat/page/widget/grid_delegate.dart';
 import 'package:flutter/material.dart';
 
 import 'page_game.dart';
@@ -36,9 +39,11 @@ class _PlayerListPageState extends State<PlayerListPage> {
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
           title: const Text(
-            'Players',
+            'Игроки',
             style: TextStyle(fontSize: 24),
           ),
+          centerTitle: true,
+          backgroundColor: Theme.of(context).primaryColor,
         ),
         body: Center(
           child: isLoading
@@ -57,7 +62,7 @@ class _PlayerListPageState extends State<PlayerListPage> {
               heroTag: 'fab_page_player_list_start',
               backgroundColor:
                   selectedPlayers.length > 1 ? Colors.blue : Colors.grey,
-              child: const Icon(Icons.flag),
+              child: const Icon(Icons.flag, color: Colors.white),
               onPressed: () async {
                 if (selectedPlayers.length > 1) {
                   DateTime dt = DateTime.now();
@@ -88,61 +93,109 @@ class _PlayerListPageState extends State<PlayerListPage> {
             FloatingActionButton(
               heroTag: 'fab_page_player_list_new_player',
               backgroundColor: Colors.green,
-              child: const Icon(Icons.person_add),
+              child: const Icon(Icons.person_add, color: Colors.white),
               onPressed: () async {
-                if (players.isEmpty) {
-                  await BlitzStatDatabase.instance.generateBasicPlayers();
-                } else {
-                  await BlitzStatDatabase.instance
-                      .createPlayer(PlayerEntity(firstname: 'PLAYER'));
-                }
-                await refreshPlayers();
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => AddPlayerPage(),
+                  ),
+                );
+
+                // todo: remove unnecessary functions and code
+                // if (players.isEmpty) {
+                //   await BlitzStatDatabase.instance.generateBasicPlayers();
+                // } else {
+                //   await BlitzStatDatabase.instance
+                //       .createPlayer(PlayerEntity(firstname: 'PLAYER'));
+                // }
+                // await refreshPlayers();
               },
             ),
           ],
         ),
       );
 
-  Widget buildPlayers() => ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: players.length,
-        itemBuilder: (context, index) {
-          final player = players[index];
+  Widget buildPlayers() {
+    return GridView.builder(
+      gridDelegate:
+          const SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
+        crossAxisCount: 2,
+        height: 196,
+      ),
+      // padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: players.length,
+      itemBuilder: (context, index) {
+        return _buildPlayerItem(players[index]);
+      },
+    );
+  }
 
-          return GestureDetector(
-            onTap: () {
-              if (selectedPlayers.contains(player)) {
-                selectedPlayers.remove(player);
-              } else {
-                selectedPlayers.add(player);
-              }
-              setState(() {});
-            },
-            child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+  // todo: change to PlayerListItem
+  Widget _buildPlayerItem(PlayerEntity playerEntity) {
+    return GestureDetector(
+      onTap: () {
+        if (selectedPlayers.contains(playerEntity)) {
+          selectedPlayers.remove(playerEntity);
+        } else {
+          selectedPlayers.add(playerEntity);
+        }
+        setState(() {});
+      },
+      child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          elevation: 4,
+          color: selectedPlayers.contains(playerEntity) ? Colors.green : null,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              children: [
+                CircleAvatar(
+                  backgroundImage: AssetImage(
+                      "assets/images/${playerEntity.id! > 4 ? 'avatar' : playerEntity.id.toString()}.jpg"),
+                  radius: 40,
                 ),
-                margin: index == players.length - 1
-                    ? const EdgeInsets.symmetric(vertical: 16)
-                    : const EdgeInsets.only(top: 16),
-                elevation: 8,
-                color: selectedPlayers.contains(player) ? Colors.green : null,
-                child: Column(
+                Text('${playerEntity.firstname}',
+                    style: const TextStyle(fontSize: 24)),
+                Text(playerEntity.lastname ?? '',
+                    style: const TextStyle(fontSize: 24)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Container(
-                      // color: Colors.red,
-                      height: 50,
-                      alignment: Alignment.center,
-                      child: Text(
-                        '${player.firstname} ${player.id}',
+                    Card(
+                      // color: Colors.blue,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Icon(Icons.star_outline,
+                                color: constants.accentColor),
+                            Text('99', style: TextStyle(fontSize: 24)),
+                          ],
+                        ),
                       ),
                     ),
-                    Container(
-                        color: Colors.green,
-                        child: Text(player.dtCreate.toString())),
+                    Card(
+                      // color: Colors.yellow,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Icon(Icons.functions,
+                                color: constants.primaryColor),
+                            Text('99', style: TextStyle(fontSize: 24)),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
-                )),
-          );
-        },
-      );
+                )
+              ],
+            ),
+          )),
+    );
+  }
 }
